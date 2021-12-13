@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # pomoc: https://towardsdatascience.com/extract-features-of-music-75a3f9bc265d
 # MFCC params
-n_mfcc = 13
+n_mfcc = 39
 n_mels = 40
 n_fft = 512
 hop_length = 160
@@ -20,7 +20,7 @@ print(type(y), type(sr))
 # %%
 #display waveform (amplitude vs time)
 # import matplotlib.pyplot as plt
-# import librosa.display
+import librosa.display
 plt.figure(figsize=(14, 5))
 librosa.display.waveplot(y, sr=sr)
 plt.show()
@@ -51,3 +51,6 @@ mfcc_librosa = librosa.feature.mfcc(y=y, sr=sr, n_fft=n_fft,
                                     fmin=fmin, fmax=fmax, htk=False)
 librosa.display.specshow(mfccs, sr=sr, x_axis='time')
 plt.show()
+
+# %%
+print(type(mfccs))
