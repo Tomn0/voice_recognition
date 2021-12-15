@@ -2,21 +2,35 @@ import numpy as np
 from scipy.io import wavfile
 import librosa
 import matplotlib.pyplot as plt
+import glob
+import os
+import wave
 
 # pomoc: https://towardsdatascience.com/extract-features-of-music-75a3f9bc265d
 # MFCC params
-n_mfcc = 39
-n_mels = 40
-n_fft = 512
-hop_length = 160
-fmin = 0
-fmax = None
-sr = 16000
+# dokładniejszy opis poszczególnych parametrów:
+# https://stackoverflow.com/questions/37963042/python-librosa-what-is-the-default-frame-size-used-to-compute-the-mfcc-feature
+# n_mfcc = 24
+# n_mels = 40
+# n_fft = 512
+# hop_length = 160
+# fmin = 0
+# fmax = None
+# sr = 16000
 
 # librosa.util.example_audio_file()
-y, sr = librosa.load("data\\vox1_dev_wav_partaa_unzip\\id10001\\1zcIwhmdeo4\\00001.wav", sr=sr)
-print(type(y), type(sr))
-
+users = {}
+user_ids = os.listdir("data\\vox1_dev_wav_partaa_unzip")
+for user_id in user_ids:
+    sample = np.array([])
+    for file in glob.iglob(f"data\\vox1_dev_wav_partaa_unzip\\{user_id}\\**\\*.wav"):
+        y, sr = librosa.load(file)  # if error: add sr=sr
+        assert sr == 22050, f"wrong sampling rate for {file} - {sr}"
+        duration_in_seconds = float(len(y) / sr)
+        sample = np.append(sample, y)
+    users[f'{user_id}'] = sample
+    
+len(users)
 # %%
 #display waveform (amplitude vs time)
 # import matplotlib.pyplot as plt
@@ -37,7 +51,7 @@ plt.colorbar()
 plt.show()
 
 # %%
-mfccs = librosa.feature.mfcc(y, sr=sr)
+mfccs = librosa.feature.mfcc(y, sr=sr, n_mfcc=24)
 print(mfccs.shape)
 #Displaying  the MFCCs:
 librosa.display.specshow(mfccs, sr=sr, x_axis='time')
@@ -53,4 +67,5 @@ librosa.display.specshow(mfccs, sr=sr, x_axis='time')
 plt.show()
 
 # %%
+print(mfccs.shape)
 print(type(mfccs))
