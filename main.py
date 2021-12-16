@@ -1,10 +1,9 @@
 import numpy as np
-from scipy.io import wavfile
 import librosa
-import matplotlib.pyplot as plt
 import glob
 import os
-import wave
+import pickle
+
 
 # pomoc: https://towardsdatascience.com/extract-features-of-music-75a3f9bc265d
 # MFCC params
@@ -17,55 +16,35 @@ import wave
 # fmin = 0
 # fmax = None
 # sr = 16000
+# # ogranąc do czego są te wszystkie opcje
+# mfcc_librosa = librosa.feature.mfcc(y=y, sr=sr, n_fft=n_fft,
+#                                     n_mfcc=n_mfcc, n_mels=n_mels,
+#                                     hop_length=hop_length,
+#                                     fmin=fmin, fmax=fmax, htk=False)
+
+# mfcc global params
+n_ftt=512
+hop_length=512
 
 # librosa.util.example_audio_file()
 users = {}
 user_ids = os.listdir("data\\vox1_dev_wav_partaa_unzip")
+user_ids = user_ids[0:10]
 for user_id in user_ids:
     sample = np.array([])
     for file in glob.iglob(f"data\\vox1_dev_wav_partaa_unzip\\{user_id}\\**\\*.wav"):
         y, sr = librosa.load(file)  # if error: add sr=sr
         assert sr == 22050, f"wrong sampling rate for {file} - {sr}"
-        duration_in_seconds = float(len(y) / sr)
         sample = np.append(sample, y)
-    users[f'{user_id}'] = sample
+        # 200 * 22050
+        duration_in_seconds = float(len(sample) / sr)
+        if duration_in_seconds > 200:
+            sample = sample[:4410000]
+            break
+    sr = 22050
+    mfcc = librosa.feature.mfcc(sample, sr=sr, n_mfcc=24)
+    users[f'{user_id}'] = mfcc
     
 len(users)
-# %%
-#display waveform (amplitude vs time)
-# import matplotlib.pyplot as plt
-import librosa.display
-plt.figure(figsize=(14, 5))
-librosa.display.waveplot(y, sr=sr)
-plt.show()
+pickle.dump(users, open("users1-10.p", "wb"))
 
-# %%
-#display Spectrogram
-X = librosa.stft(y)
-Xdb = librosa.amplitude_to_db(abs(X))
-plt.figure(figsize=(14, 5))
-librosa.display.specshow(Xdb, sr=sr, x_axis='time', y_axis='hz')
-#If to pring log of frequencies
-#librosa.display.specshow(Xdb, sr=sr, x_axis='time', y_axis='log')
-plt.colorbar()
-plt.show()
-
-# %%
-mfccs = librosa.feature.mfcc(y, sr=sr, n_mfcc=24)
-print(mfccs.shape)
-#Displaying  the MFCCs:
-librosa.display.specshow(mfccs, sr=sr, x_axis='time')
-plt.show()
-
-# %%
-# ogranąc do czego są te wszystkie opcje
-mfcc_librosa = librosa.feature.mfcc(y=y, sr=sr, n_fft=n_fft,
-                                    n_mfcc=n_mfcc, n_mels=n_mels,
-                                    hop_length=hop_length,
-                                    fmin=fmin, fmax=fmax, htk=False)
-librosa.display.specshow(mfccs, sr=sr, x_axis='time')
-plt.show()
-
-# %%
-print(mfccs.shape)
-print(type(mfccs))
