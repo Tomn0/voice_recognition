@@ -1,9 +1,10 @@
 import numpy as np
 import librosa
+import librosa.display
 import glob
 import os
 import pickle
-# import librosa.display
+import matplotlib.pylab as plt
 from util_functions import display_mfccs, display_waveform, display_spectrogram
 
 
@@ -46,11 +47,17 @@ def main():
                 sample = sample[:4410000]
                 break
         sr = 22050
-        mfcc = librosa.feature.mfcc(sample, sr=sr, n_mfcc=24)
-        users[f'{user_id}'] = mfcc
+        mfcc = librosa.feature.mfcc(sample, sr=sr, n_mfcc=13)
+        mfcc = mfcc[1:]     # pierwsza cecha to moc - nie jest nam potrzebna (czy na pewno?)
 
+        delta_mfcc = librosa.feature.delta(mfcc, axis=1)
+        delta2_mfcc = librosa.feature.delta(mfcc, order=2, axis=1)
+        mfccs = np.concatenate((mfcc, delta_mfcc, delta2_mfcc), axis=0)
+
+        users[f'{user_id}'] = mfccs
     len(users)
     pickle.dump(users, open("users10.p", "wb"))
+
 
 main()
 
