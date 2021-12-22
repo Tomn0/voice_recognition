@@ -33,11 +33,11 @@ def main():
 
     # librosa.util.example_audio_file()
     users = {}
-    user_ids = os.listdir("data\\vox1_dev_wav_partaa_unzip")
-    user_ids = user_ids[0:10]
+    user_ids = os.listdir("data\\test")
+    user_ids = user_ids[0:512]
     for user_id in user_ids:
         sample = np.array([])
-        for file in glob.iglob(f"data\\vox1_dev_wav_partaa_unzip\\{user_id}\\**\\*.wav"):
+        for file in glob.iglob(f"data\\test\\{user_id}\\**\\*.wav"):
             y, sr = librosa.load(file)  # if error: add sr=sr
             assert sr == 22050, f"wrong sampling rate for {file} - {sr}"
             sample = np.append(sample, y)
@@ -56,7 +56,7 @@ def main():
 
         users[f'{user_id}'] = mfccs
     len(users)
-    pickle.dump(users, open("users10.p", "wb"))
+    pickle.dump(users, open("data/test.p", "wb"))
 
 
 main()
