@@ -7,6 +7,7 @@ from keras.models import Sequential
 from sklearn.metrics.pairwise import cosine_similarity
 
 # %%
+# initialize
 # loading train data
 train_data = {}
 with open(f"data\\users512.p", "rb") as f:
@@ -14,7 +15,7 @@ with open(f"data\\users512.p", "rb") as f:
 
     train_data.update(tmp_dict)
 
-# %%
+#
 # loading evaluation data
 eval_data = {}
 for it in range(2):
@@ -22,7 +23,7 @@ for it in range(2):
         tmp_dict = pickle.load(f)
 
     eval_data.update(tmp_dict)
-# %%
+#
 # nie używane w MLP
 ubm_data = np.empty((36, 1))
 
@@ -32,7 +33,7 @@ for person_id in train_data.keys():
 ubm_data = ubm_data[:, 1:]
 print(ubm_data.shape)
 
-# %%
+#
 plt.figure(figsize=(20, 10))
 for it in range(ubm_data.shape[0]):
   plt.subplot(6, 6, it+1)
@@ -40,7 +41,7 @@ for it in range(ubm_data.shape[0]):
 
 plt.show()
 
-# %%
+#
 # ANN (Artificial Neural Network) DATA PREPARATION
 # Cut data into 5 second chunks, flatten,
 # Create parallel person label tensor (id -> number -> onehot)
@@ -71,23 +72,31 @@ X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y_onehot,
                                                       test_size=0.2,
                                                       random_state=123)
 
-# %%
+
+
+#
 print(X_train.shape)
 print(X_valid.shape)
 print(Y_train.shape)
 print(Y_valid.shape)
+
+
 # %%
 # Model1
 model1 = Sequential()
-model1.add(Dense(128, input_dim=7740,  activation='relu'))
-model1.add(Flatten())
-model1.add(Dense(64, activation='sigmoid'))
+model1.add(Flatten(input_dim=7740))
+model1.add(Dense(64, activation='relu'))
+# model1.add(Flatten())
 model1.add(Dense(128, activation='relu'))
+model1.add(Dense(128, activation='sigmoid'))
+model1.add(Dense(256, activation='relu'))
 model1.add(Dense(512, activation='softmax'))
 
 model1.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-history = model1.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=100, batch_size=128)
+model1.summary()
+
+history = model1.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=70, batch_size=128)
 
 # list all data in history
 print(history.history.keys())
@@ -108,12 +117,14 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
 
-# %%
+#
 center_vector1 = model1.predict(X_train).mean(axis=0)
 # print(center_vector1.shape)
 models = {}
 models['model1'] = (model1, center_vector1)
 
+
+ # %%
 # util functions
 def create_enroll_and_test_set(eval_user, enroll_len=60, test_len=30):
     slice_len = 5  # długość slice'a (5 sekund)
@@ -277,4 +288,4 @@ DETCurve(far_frr)
 #       RESULTS
 #########################
 
-import csv
+# import csv
