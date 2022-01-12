@@ -49,7 +49,7 @@ def mfccs_gen():
                 break
         sr = 22050
         mfcc = librosa.feature.mfcc(sample, sr=sr, n_mfcc=13)
-        mfcc = mfcc[1:]     # pierwsza cecha to moc - nie jest nam potrzebna (czy na pewno?)
+        mfcc = mfcc[1:]     # pierwsza cecha to moc - nie jest nam potrzebna (na pewno?)
 
         delta_mfcc = librosa.feature.delta(mfcc, axis=1)
         delta2_mfcc = librosa.feature.delta(mfcc, order=2, axis=1)

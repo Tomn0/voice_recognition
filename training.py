@@ -80,23 +80,52 @@ print(X_valid.shape)
 print(Y_train.shape)
 print(Y_valid.shape)
 
+# pomysły na poprawę modelu: https://machinelearningmastery.com/improve-deep-learning-performance/
 
 # %%
+# # Model1
+# model1 = Sequential()
+# model1.add(Flatten(input_dim=7740))
+# model1.add(Dense(64, activation='relu'))
+# model1.add(Dense(128, activation='relu'))
+# model1.add(Dense(512, activation='sigmoid'))
+# model1.add(Dense(1024, activation='relu'))
+# model1.add(Dense(512, activation='softmax'))
+# model1.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+########################
 # Model1
+# model1 = Sequential()
+# model1.add(Flatten(input_dim=7740))
+# model1.add(Dense(1024, activation='relu'))
+# model1.add(Dense(512, activation='relu'))
+# model1.add(Dense(256, activation='relu'))
+# model1.add(Dense(512, activation='relu'))
+# model1.add(Dense(128, activation='relu'))
+# model1.add(Dense(256, activation='relu'))
+# model1.add(Dense(128, activation='relu'))
+# model1.add(Dense(256, activation='relu'))
+# model1.add(Dense(128, activation='relu'))
+# model1.add(Dense(512, activation='softmax'))
+#
+# model1.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+###################
 model1 = Sequential()
 model1.add(Flatten(input_dim=7740))
+# model1.add(Dense(512, activation='relu'))
 model1.add(Dense(64, activation='relu'))
-# model1.add(Flatten())
+
 model1.add(Dense(128, activation='relu'))
-model1.add(Dense(128, activation='sigmoid'))
+model1.add(Dense(256, activation='softsign'))
 model1.add(Dense(256, activation='relu'))
 model1.add(Dense(512, activation='softmax'))
 
-model1.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model1.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
 
 model1.summary()
 
-history = model1.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=70, batch_size=128)
+history = model1.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=60, batch_size=1024)
 
 # list all data in history
 print(history.history.keys())
