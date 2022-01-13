@@ -4,6 +4,8 @@ import os
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 import glob
+from generate_mfccs import mfccs_gen
+from generate_mfccs import create_user_sample
 
 # prepare audio to conv
 fs_ir, tmp_ir = wavfile.read(open("iPad_ir.wav", 'rb'))
@@ -22,4 +24,4 @@ for filename in os.listdir(f"data\\vox1_spoof\\id10001\\7gWzIy6yIIk"):
         """CONVOLVING IMPULSE RESPONSE"""
         convolved_data = np.convolve(audio, ir, mode='valid')
         convolved_data = convolved_data.astype(np.int16)
-        wavfile.write('conv_'+filename, fs_ir, convolved_data)
+        # wavfile.write('conv_'+filename, fs_ir, convolved_data)

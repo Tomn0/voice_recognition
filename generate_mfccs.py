@@ -1,4 +1,4 @@
-"""This module contains a function to transform audio data from .wav format to mfccs"""
+"""This module contains functions to transform audio data from .wav format to mfccs"""
 import numpy as np
 import librosa
 import librosa.display
@@ -30,35 +30,48 @@ n_ftt = 512
 hop_length = 512
 
 
-def mfccs_gen():
+def mfccs_gen(sample: np.array([])):
+    sr = 22050
+    mfcc = librosa.feature.mfcc(sample, sr=sr, n_mfcc=13)
+    mfcc = mfcc[1:]     # pierwsza cecha to moc - nie jest nam potrzebna (na pewno?)
 
-    # librosa.util.example_audio_file()
-    users = {}
-    user_ids = os.listdir("data\\test")
-    user_ids = user_ids[0:512]
-    for user_id in user_ids:
-        sample = np.array([])
-        for file in glob.iglob(f"data\\test\\{user_id}\\**\\*.wav"):
-            y, sr = librosa.load(file)  # if error: add sr=sr
-            assert sr == 22050, f"wrong sampling rate for {file} - {sr}"
-            sample = np.append(sample, y)
-            # 200 * 22050
-            duration_in_seconds = float(len(sample) / sr)
-            if duration_in_seconds > 200:
-                sample = sample[:4410000]
-                break
-        sr = 22050
-        mfcc = librosa.feature.mfcc(sample, sr=sr, n_mfcc=13)
-        mfcc = mfcc[1:]     # pierwsza cecha to moc - nie jest nam potrzebna (na pewno?)
+    delta_mfcc = librosa.feature.delta(mfcc, axis=1)
+    delta2_mfcc = librosa.feature.delta(mfcc, order=2, axis=1)
+    mfccs = np.concatenate((mfcc, delta_mfcc, delta2_mfcc), axis=0)
 
-        delta_mfcc = librosa.feature.delta(mfcc, axis=1)
-        delta2_mfcc = librosa.feature.delta(mfcc, order=2, axis=1)
-        mfccs = np.concatenate((mfcc, delta_mfcc, delta2_mfcc), axis=0)
-
-        users[f'{user_id}'] = mfccs
-    len(users)
-    pickle.dump(users, open("data/test.p", "wb"))
+    return mfccs
 
 
-mfccs_gen()
+def create_user_sample(user_path):
+    sample = np.array([])
+    for file in glob.iglob(f"{user_path}\\**\\*.wav"):
+
+        y, sr = librosa.load(file)  # if error: add sr=sr
+        assert sr == 22050, f"wrong sampling rate for {file} - {sr}"
+        sample = np.append(sample, y)
+        # 200 * 22050
+        duration_in_seconds = float(len(sample) / sr)
+        if duration_in_seconds > 200:
+            sample = sample[:4410000]
+            break
+
+    return sample
+
+
+global_path = "data\\test"
+# librosa.util.example_audio_file()
+users = {}
+user_ids = os.listdir(global_path)
+user_ids = user_ids[0:512]
+for user_id in user_ids:
+
+    user_folder_path = f"{global_path}\\{user_id}"
+    user_sample = create_user_sample(user_folder_path)
+    users[f'{user_id}'] = mfccs_gen(user_sample)
+
+len(users)
+pickle.dump(users, open("data\\test.p", "wb"))
+
+
+
 
