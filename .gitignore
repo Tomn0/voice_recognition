@@ -5,3 +5,6 @@
 /notebooks/
 *.wav
 *.p
+!Behritone_ir.wav
+!iPad_ir.wav
+!iPhone_ir.wav

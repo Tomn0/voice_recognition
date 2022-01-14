@@ -19,7 +19,7 @@ irs = ["iPad_ir.wav", "iPhone_ir.wav", "Behritone_ir.wav"]
 def convolve_audio(user_audio):
     # prepare audio to conv
     # fs_ir, tmp_ir = wavfile.read("iPad_ir.wav")
-    tmp_ir, fs_ir = librosa.load(random.choice(irs), sr=22050)
+    tmp_ir, fs_ir = librosa.load(f"irs\\{random.choice(irs)}", sr=22050)
 
     # tmp_ir, fs_ir = librosa.load("iPad_ir.wav", sr=22050)
     # tmp_ir, fs_ir = sf.read("iPad_ir.wav")
@@ -28,7 +28,7 @@ def convolve_audio(user_audio):
     # tmp_ir /= 2 ** (nbits - 1)
     # tmp_ir = tmp_ir[:500] / (2 ** 15)     # THIS IS THE SAME!
 
-    ir = np.array(tmp_ir)   #chyba nie jest potrzebne
+    ir = np.array(tmp_ir)   # chyba nie jest potrzebne
 
     """CONVOLVING IMPULSE RESPONSE"""
     convolved_data = np.convolve(user_audio, ir, mode='same')

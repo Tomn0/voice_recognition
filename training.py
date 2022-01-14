@@ -93,22 +93,6 @@ print(Y_valid.shape)
 # model1.add(Dense(512, activation='softmax'))
 # model1.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-########################
-# Model1
-# model1 = Sequential()
-# model1.add(Flatten(input_dim=7740))
-# model1.add(Dense(1024, activation='relu'))
-# model1.add(Dense(512, activation='relu'))
-# model1.add(Dense(256, activation='relu'))
-# model1.add(Dense(512, activation='relu'))
-# model1.add(Dense(128, activation='relu'))
-# model1.add(Dense(256, activation='relu'))
-# model1.add(Dense(128, activation='relu'))
-# model1.add(Dense(256, activation='relu'))
-# model1.add(Dense(128, activation='relu'))
-# model1.add(Dense(512, activation='softmax'))
-#
-# model1.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 ###################
 model1 = Sequential()
