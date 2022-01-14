@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from keras.layers import Dense, Flatten
 from keras.models import Sequential
-from keras.wrappers.scikit_learn import KerasClassifier
+from scikeras.wrappers import KerasClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 
@@ -77,6 +77,7 @@ X_train, X_valid, Y_train, Y_valid = train_test_split(X, encoded_Y,
 #   k-fold cross validation
 ###############################
 
+
 def create_model():
     model = Sequential()
     model.add(Dense(521, input_dim=7740, activation='relu'))
@@ -86,7 +87,7 @@ def create_model():
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 
-estimator = KerasClassifier(build_fn=create_model, epochs=100, batch_size=512)
+estimator = KerasClassifier(model=create_model, epochs=100, batch_size=512)
 kfold = StratifiedKFold(n_splits=8, shuffle=True)
 results = cross_val_score(estimator, X, encoded_Y, cv=kfold)
 print("Baseline: %.2f%% (%.2f%%))" % (results.mean()*100, results.std()*100))
