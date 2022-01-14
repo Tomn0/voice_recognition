@@ -12,7 +12,7 @@ import pickle
 import random
 
 
-GLOBAL_PATH = "data\\vox1_spoof"
+GLOBAL_PATH = "data\\vox1_dev_wav_partaa_unzip"
 irs = ["iPad_ir.wav", "iPhone_ir.wav", "Behritone_ir.wav"]
 
 
@@ -41,7 +41,7 @@ def convolve_audio(user_audio):
 
 users = {}
 user_ids = os.listdir(GLOBAL_PATH)
-# print(user_ids)
+user_ids = user_ids[0:512]
 
 for user_id in user_ids:
     user_folder_path = f"{GLOBAL_PATH}\\{user_id}"
@@ -52,5 +52,5 @@ for user_id in user_ids:
     # librosa.display.specshow(users['id10001'], sr=22050, x_axis='time')
     # plt.show()
 
-pickle.dump(users, open("data\\test_spoof_10.p", "wb"))
+pickle.dump(users, open("data\\spoof512.p", "wb"))
 

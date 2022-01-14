@@ -1,9 +1,12 @@
 import numpy as np
 import pickle
-import matplotlib
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from keras.layers import Dense, Flatten
+from keras.models import Sequential
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import cross_val_score
 
 # %%
 # initialize
@@ -15,7 +18,7 @@ with open(f"data\\users512.p", "rb") as f:
     real_data.update(tmp_dict)
 
 spoofing_data = {}
-with open(f"data\\test_spoof_10.p", "rb") as f:
+with open(f"data\\spoof512.p", "rb") as f:
     tmp_dict = pickle.load(f)
 
     spoofing_data.update(tmp_dict)
@@ -69,4 +72,22 @@ X_train, X_valid, Y_train, Y_valid = train_test_split(X, encoded_Y,
                                                       test_size=0.2,
                                                       random_state=123)
 
+###############################
+#           Training
+#   k-fold cross validation
+###############################
+
+def create_model():
+    model = Sequential()
+    model.add(Dense(521, input_dim=7740, activation='relu'))
+    model.add(Dense(64, activation="relu"))
+    model.add(Dense(1, activation='sigmoid'))
+    
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+
+estimator = KerasClassifier(build_fn=create_model, epochs=100, batch_size=512)
+kfold = StratifiedKFold(n_splits=8, shuffle=True)
+results = cross_val_score(estimator, X, encoded_Y, cv=kfold)
+print("Baseline: %.2f%% (%.2f%%))" % (results.mean()*100, results.std()*100))
 
