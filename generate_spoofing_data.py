@@ -8,20 +8,18 @@ from scipy.io import wavfile
 import glob
 from generate_mfccs import mfccs_gen
 from generate_mfccs import create_user_sample
-from util_functions import display_mfccs, display_waveform, display_spectrogram
 import pickle
+import random
 
 
 GLOBAL_PATH = "data\\vox1_spoof"
+irs = ["iPad_ir.wav", "iPhone_ir.wav", "Behritone_ir.wav"]
 
 
 def convolve_audio(user_audio):
     # prepare audio to conv
     # fs_ir, tmp_ir = wavfile.read("iPad_ir.wav")
-    tmp_ir, fs_ir = librosa.load("iPad_ir.wav", sr=22050)
-
-    # display_waveform(tmp_ir, fs_ir)
-    # display_spectrogram(tmp_ir, fs_ir)
+    tmp_ir, fs_ir = librosa.load(random.choice(irs), sr=22050)
 
     # tmp_ir, fs_ir = librosa.load("iPad_ir.wav", sr=22050)
     # tmp_ir, fs_ir = sf.read("iPad_ir.wav")
@@ -43,7 +41,7 @@ def convolve_audio(user_audio):
 
 users = {}
 user_ids = os.listdir(GLOBAL_PATH)
-print(user_ids)
+# print(user_ids)
 
 for user_id in user_ids:
     user_folder_path = f"{GLOBAL_PATH}\\{user_id}"

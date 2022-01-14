@@ -113,16 +113,16 @@ print(Y_valid.shape)
 ###################
 model1 = Sequential()
 model1.add(Flatten(input_dim=7740))
-model1.add(Dense(1024, activation='relu'))
-model1.add(Dense(512, activation='softsign'))
-model1.add(Dense(512, activation='softsign'))
+model1.add(Dense(512, activation='relu'))
+model1.add(Dense(256, activation='softsign'))
+model1.add(Dense(256, activation='relu'))
 model1.add(Dense(512, activation='softmax'))
 
-model1.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model1.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
 
 model1.summary()
 
-history = model1.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=100, batch_size=1024)
+history = model1.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=80, batch_size=512)
 
 # list all data in history
 print(history.history.keys())
