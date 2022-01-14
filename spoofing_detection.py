@@ -2,78 +2,71 @@ import numpy as np
 import pickle
 import matplotlib
 import matplotlib.pyplot as plt
-from keras.layers import Dense, Flatten
-from keras.models import Sequential
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
 
 # %%
 # initialize
 # loading train data
-train_data = {}
+real_data = {}
 with open(f"data\\users512.p", "rb") as f:
     tmp_dict = pickle.load(f)
 
-    train_data.update(tmp_dict)
+    real_data.update(tmp_dict)
+
+spoofing_data = {}
+with open(f"data\\test_spoof_10.p", "rb") as f:
+    tmp_dict = pickle.load(f)
+
+    spoofing_data.update(tmp_dict)
 
 #
 # loading evaluation data
-eval_data = {}
-for it in range(2):
-    with open(f"data\\test.p", 'rb') as f:
-        tmp_dict = pickle.load(f)
-
-    eval_data.update(tmp_dict)
+# eval_data = {}
+# for it in range(2):
+#     with open(f"data\\test.p", 'rb') as f:
+#         tmp_dict = pickle.load(f)
 #
-# nie używane w MLP
-ubm_data = np.empty((36, 1))
+#     eval_data.update(tmp_dict)
 
-for person_id in train_data.keys():
-  ubm_data = np.concatenate((ubm_data, train_data[person_id]), axis=1)
 
-ubm_data = ubm_data[:, 1:]
-print(ubm_data.shape)
-
-#
-plt.figure(figsize=(20, 10))
-for it in range(ubm_data.shape[0]):
-  plt.subplot(6, 6, it+1)
-  plt.hist(ubm_data[it, :], bins=64)
-
-plt.show()
-
-#
-# ANN (Artificial Neural Network) DATA PREPARATION
+# DATA PREPARATION
 # Cut data into 5 second chunks, flatten,
-# Create parallel person label tensor (id -> number -> onehot)
-# Split data into training and validation sets for neural network training
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
-X = []
-Y = []
-for it, person_id in enumerate(train_data.keys()):
-  chunk_len = int((train_data[person_id]).shape[1]*(5/200))
-  print(chunk_len*36)
-  for position in range(0, train_data[person_id].shape[1], chunk_len):
-    tmp_data = (train_data[person_id])[:, position:position+chunk_len]
-    try:
-      tmp_data = np.reshape(tmp_data, (chunk_len*36,))
-      X.append(tmp_data)
-      Y.append(it)
-    except Exception as e:
-      print(f'sample shape = {tmp_data.shape}, not appending')
-    # print(tmp_data.shape)
-X = np.array(X)
-Y = np.array(Y)
-print(X.shape)
-print(Y.shape)
-Y_onehot = to_categorical(Y, num_classes=512)
-print(Y_onehot.shape)
-X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y_onehot,
+
+
+def to_chunk(data_to_chunk: dict, label: str):
+    X = []
+    Y = []
+    for it, person_id in enumerate(data_to_chunk.keys()):
+        chunk_len = int((data_to_chunk[person_id]).shape[1] * (5 / 200))
+        for position in range(0, data_to_chunk[person_id].shape[1], chunk_len):
+            tmp_data = (data_to_chunk[person_id])[:, position:position + chunk_len]
+            try:
+                tmp_data = np.reshape(tmp_data, (chunk_len * 36,))
+                X.append(tmp_data)
+                Y.append(label)
+            except Exception as e:
+                pass
+    X = np.array(X)
+    Y = np.array(Y)
+
+    return X, Y
+
+
+X_spoof, Y_spoof = to_chunk(spoofing_data, "spoof")
+X_real, Y_real = to_chunk(real_data, "real")
+
+X = np.concatenate((X_spoof, X_real), axis=0)
+Y = np.concatenate((Y_spoof, Y_real), axis=0)
+
+encoder = LabelEncoder()
+encoder.fit(Y)
+encoded_Y = encoder.transform(Y)
+
+X_train, X_valid, Y_train, Y_valid = train_test_split(X, encoded_Y,
                                                       test_size=0.2,
                                                       random_state=123)
 
-#
-print(X_train.shape)
-print(X_valid.shape)
-print(Y_train.shape)
-print(Y_valid.shape)
+
