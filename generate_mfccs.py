@@ -45,16 +45,14 @@ def mfccs_gen(sample: np.array([])):
 def create_user_sample(user_path):
     sample = np.array([])
     for file in glob.iglob(f"{user_path}\\**\\*.wav"):
-
         y, sr = librosa.load(file)  # if error: add sr=sr
         assert sr == 22050, f"wrong sampling rate for {file} - {sr}"
         sample = np.append(sample, y)
         # 200 * 22050
         duration_in_seconds = float(len(sample) / sr)
         if duration_in_seconds > 200:
-            sample = sample[:4410000]
+            sample = sample[:4410000]   # truncate audio to make exactly 200 seconds
             break
-
     return sample
 
 
