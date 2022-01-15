@@ -8,6 +8,7 @@ from scikeras.wrappers import KerasClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 
+
 # %%
 # initialize
 # loading train data
@@ -18,11 +19,18 @@ with open(f"data\\users512.p", "rb") as f:
     real_data.update(tmp_dict)
 
 spoofing_data = {}
-with open(f"data\\spoof512.p", "rb") as f:
-    tmp_dict = pickle.load(f)
+# with open(f"data\\spoof512.p", "rb") as f:
+#     tmp_dict = pickle.load(f)
+#
+#     spoofing_data.update(tmp_dict)
+
+files = ["spoof0-10", "spoof20-30", "spoof30-40", "spoof40-50", "spoof50-60", "spoof60-70", "spoof70-80", "spoo80-90", ]
+
+for file in files:
+    with open(f"data\\spoof\\{file}") as f:
+        tmp_dict = pickle.load(f)
 
     spoofing_data.update(tmp_dict)
-
 #
 # loading evaluation data
 # eval_data = {}
@@ -91,4 +99,10 @@ estimator = KerasClassifier(model=create_model, epochs=100, batch_size=512)
 kfold = StratifiedKFold(n_splits=8, shuffle=True)
 results = cross_val_score(estimator, X, encoded_Y, cv=kfold)
 print("Baseline: %.2f%% (%.2f%%))" % (results.mean()*100, results.std()*100))
+
+
+### ????
+# y_porb = model.predict(x)
+# metrics.binary_accuracy()
+
 

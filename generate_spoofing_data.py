@@ -1,56 +1,84 @@
 import numpy as np
-import librosa
 import librosa.display
-import soundfile as sf
 import os
-import matplotlib.pyplot as plt
-from scipy.io import wavfile
-import glob
 from generate_mfccs import mfccs_gen
 from generate_mfccs import create_user_sample
 import pickle
-import random
+import time
+from datetime import datetime
 
 
 GLOBAL_PATH = "data\\vox1_dev_wav_partaa_unzip"
-irs = ["iPad_ir.wav", "iPhone_ir.wav", "Behritone_ir.wav"]
+irs_paths = ["iPad_ir.wav", "iPhone_ir.wav", "Behritone_ir.wav"]
+irs = []
+
+"""Initiate IRs"""
+print("#"*20)
+print("Initiating IRs...")
+for ind, ir_path in enumerate(irs_paths):
+    ir, fs_ir = librosa.load(f"irs\\{irs_paths[ind]}", sr=22050)
+    irs.append((ir, fs_ir))
+
+print("Done")
+print("#"*20)
+print('\n'*2)
 
 
-def convolve_audio(user_audio):
-    # prepare audio to conv
-    # fs_ir, tmp_ir = wavfile.read("iPad_ir.wav")
-    tmp_ir, fs_ir = librosa.load(f"irs\\{random.choice(irs)}", sr=22050)
+def convolve_audio(user_audio, which_audio):
+    ir, fs_ir = irs[which_audio]
 
-    # tmp_ir, fs_ir = librosa.load("iPad_ir.wav", sr=22050)
-    # tmp_ir, fs_ir = sf.read("iPad_ir.wav")
-    # """modify wavfile.read output to match output from librosa.load"""
-    # nbits = 16
-    # tmp_ir /= 2 ** (nbits - 1)
-    # tmp_ir = tmp_ir[:500] / (2 ** 15)     # THIS IS THE SAME!
-
-    ir = np.array(tmp_ir)   # chyba nie jest potrzebne
+    # ir = np.array(tmp_ir)   # chyba nie jest potrzebne
 
     """CONVOLVING IMPULSE RESPONSE"""
     convolved_data = np.convolve(user_audio, ir, mode='same')
-    # convolved_data = convolved_data.astype(np.int16)  # zeruje całą macierz
-    # sf.write(f'{GLOBAL_PATH}\\conv_.wav', convolved_data, samplerate=fs_ir)
-    # wavfile.write(f'{GLOBAL_PATH}\\conv_.wav', fs_ir, convolved_data)
 
     return convolved_data
 
 
-users = {}
-user_ids = os.listdir(GLOBAL_PATH)
-user_ids = user_ids[0:512]
+chunks = [30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260]
+# brakuje 10-20
 
-for user_id in user_ids:
-    user_folder_path = f"{GLOBAL_PATH}\\{user_id}"
-    user_sample = create_user_sample(user_folder_path)
-    conv = convolve_audio(user_sample)
-    users[f'{user_id}'] = mfccs_gen(user_sample)
 
-    # librosa.display.specshow(users['id10001'], sr=22050, x_axis='time')
-    # plt.show()
+start = time.time()
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("#"*20)
+print("Starting program:")
+print("Current Time =", current_time)
+print("#"*20)
+print('\n'*2)
+for i, chunk in enumerate(chunks):
+    loop_start = time.time()
 
-pickle.dump(users, open("data\\spoof512.p", "wb"))
+    users = {}
+    user_ids = os.listdir(GLOBAL_PATH)
+    user_ids = user_ids[chunk:chunk+10]
+
+    for user_id in user_ids:
+        user_folder_path = f"{GLOBAL_PATH}\\{user_id}"
+        user_sample = create_user_sample(user_folder_path)
+        conv = convolve_audio(user_sample, chunk % 3)
+        users[f'{user_id}'] = mfccs_gen(user_sample)
+
+    pickle.dump(users, open(f"data\\spoof\\spoof{chunk}-{chunk+10}.p", "wb"))
+    loop_end = time.time()
+    print("########")
+    print(f"End loop: data\\spoof\\spoof{chunk}-{chunk+10}.p")
+    print(f"With: irs\\{irs_paths[chunk % 3]}")
+    print(f"Elapsed time {loop_end - loop_start} seconds")
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("Current Time =", current_time)
+    print('\n' * 2)
+
+program_end = time.time()
+print(program_end - start)
+print("#"*20)
+print("End program")
+print(f"Elapsed time {program_end - start} seconds")
+
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+print("Current Time =", current_time)
+print("#"*20)
 
