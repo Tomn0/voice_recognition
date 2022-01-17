@@ -2,8 +2,9 @@ import numpy as np
 import pickle
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from keras.layers import Dense, Flatten
+from keras.layers import Dense, Flatten, Dropout
 from keras.models import Sequential
+import matplotlib.pyplot as plt
 from scikeras.wrappers import KerasClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
@@ -24,21 +25,13 @@ spoofing_data = {}
 #
 #     spoofing_data.update(tmp_dict)
 
-files = ["spoof0-10", "spoof20-30", "spoof30-40", "spoof40-50", "spoof50-60", "spoof60-70", "spoof70-80", "spoo80-90", ]
+files = ["spoof0-10.p", "spoof20-30.p", "spoof30-40.p", "spoof40-50.p", "spoof50-60.p", "spoof60-70.p", "spoof70-80.p", "spoof80-90.p", "spoof90-100.p","spoof100-110.p","spoof110-120.p","spoof120-130.p","spoof140-150.p","spoof150-160.p","spoof160-170.p","spoof170-180.p","spoof180-190.p","spoof190-200.p","spoof210-220.p","spoof220-230.p","spoof230-240.p","spoof240-250.p","spoof250-260.p","spoof260-270.p"]
 
 for file in files:
-    with open(f"data\\spoof\\{file}") as f:
+    with open(f"data\\spoof\\{file}", "rb") as f:
         tmp_dict = pickle.load(f)
 
     spoofing_data.update(tmp_dict)
-#
-# loading evaluation data
-# eval_data = {}
-# for it in range(2):
-#     with open(f"data\\test.p", 'rb') as f:
-#         tmp_dict = pickle.load(f)
-#
-#     eval_data.update(tmp_dict)
 
 
 # DATA PREPARATION
@@ -85,20 +78,39 @@ X_train, X_valid, Y_train, Y_valid = train_test_split(X, encoded_Y,
 #   k-fold cross validation
 ###############################
 
+# %%
 
-def create_model():
-    model = Sequential()
-    model.add(Dense(521, input_dim=7740, activation='relu'))
-    model.add(Dense(64, activation="relu"))
-    model.add(Dense(1, activation='sigmoid'))
-    
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+# def create_model():
+model = Sequential()
+model.add(Dense(512, input_dim=7740, activation='relu'))
+model.add(Dense(128, activation="relu"))
+model.add(Dense(64, activation="relu"))
+model.add(Dense(1, activation='softmax'))
+
+model.compile(loss='binary_crossentropy', optimizer='SGD', metrics=['accuracy'])
+
+history = model.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=80, batch_size=128)
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
 
 
-estimator = KerasClassifier(model=create_model, epochs=100, batch_size=512)
-kfold = StratifiedKFold(n_splits=8, shuffle=True)
-results = cross_val_score(estimator, X, encoded_Y, cv=kfold)
-print("Baseline: %.2f%% (%.2f%%))" % (results.mean()*100, results.std()*100))
+# estimator = KerasClassifier(model=create_model, epochs=100, batch_size=512)
+# kfold = StratifiedKFold(n_splits=8, shuffle=True)
+# results = cross_val_score(estimator, X, encoded_Y, cv=kfold)
+# print("Baseline: %.2f%% (%.2f%%))" % (results.mean()*100, results.std()*100))
 
 
 ### ????

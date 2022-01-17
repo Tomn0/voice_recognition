@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import matplotlib
 import matplotlib.pyplot as plt
-from keras.layers import Dense, Flatten
+from keras.layers import Dense, Flatten, Dropout
 from keras.models import Sequential
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -83,30 +83,19 @@ print(Y_valid.shape)
 # pomysły na poprawę modelu: https://machinelearningmastery.com/improve-deep-learning-performance/
 
 # %%
-# # Model1
-# model1 = Sequential()
-# model1.add(Flatten(input_dim=7740))
-# model1.add(Dense(64, activation='relu'))
-# model1.add(Dense(128, activation='relu'))
-# model1.add(Dense(512, activation='sigmoid'))
-# model1.add(Dense(1024, activation='relu'))
-# model1.add(Dense(512, activation='softmax'))
-# model1.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-
-###################
 model1 = Sequential()
 model1.add(Flatten(input_dim=7740))
 model1.add(Dense(512, activation='relu'))
 model1.add(Dense(256, activation='softsign'))
+model1.add(Dropout(0.5))
 model1.add(Dense(256, activation='relu'))
 model1.add(Dense(512, activation='softmax'))
 
-model1.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
+model1.compile(loss='categorical_crossentropy', optimizer='SGD', metrics=['accuracy'])
 
 model1.summary()
 
-history = model1.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=80, batch_size=512)
+history = model1.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=120, batch_size=512)
 
 # list all data in history
 print(history.history.keys())
@@ -203,6 +192,13 @@ def calc_confidences(model_id):
             confidence_TP.append(
                 cosine_similarity(np.expand_dims(enroll_embedding_A, axis=0), np.expand_dims(test_embedding_A, axis=0)))
 
+            '''TEST'''
+            confidence_TP.append(
+                cosine_similarity(np.expand_dims(enroll_embedding_B, axis=0), np.expand_dims(test_embedding_B, axis=0)))
+            confidence_TN.append(
+                cosine_similarity(np.expand_dims(enroll_embedding_B, axis=0), np.expand_dims(test_embedding_A, axis=0)))
+            '''ENDTEST'''
+
             # confidence_TN.append(cosine_similarity(enroll_embedding_A, test_embedding_B))
             confidence_TN.append(
                 cosine_similarity(np.expand_dims(enroll_embedding_A, axis=0), np.expand_dims(test_embedding_B, axis=0)))
@@ -235,8 +231,8 @@ plt.figure(figsize=(25, 10))
 for it, model in enumerate(scoring.keys()):
   plt.subplot(2, len(scoring.keys()), it +1)
   plt.title(model)
-  n_TN, bins, _ = plt.hist(scoring[model][0], bins=100, range=[-1, 1], alpha=0.5)
-  n_TP, bins, _ = plt.hist(scoring[model][1], bins=100, range=[-1, 1], alpha=0.5)
+  n_TN, bins_TN, _ = plt.hist(scoring[model][0], bins=100, range=[-1, 1], alpha=0.5)
+  n_TP, bins_TP, _ = plt.hist(scoring[model][1], bins=100, range=[-1, 1], alpha=0.5)
   plt.grid()
   plt.xlim([-1.5, 1.5])
   plt.legend(legend_score, loc='upper right')
@@ -255,8 +251,8 @@ for it, model in enumerate(scoring.keys()):
 
   # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
   plt.subplot(2, len(scoring.keys()), it + 1 + len(scoring.keys()))
-  plt.plot(bins[1:], far_frr[model][0])
-  plt.plot(bins[1:], far_frr[model][1])
+  plt.plot(bins_TN[1:], far_frr[model][0])
+  plt.plot(bins_TP[1:], far_frr[model][1])
   plt.legend(legend_f, loc='lower left')
   plt.xlabel('threshold')
   plt.ylabel('probability')
