@@ -76,12 +76,8 @@ X_train, X_valid, Y_train, Y_valid = train_test_split(X, encoded_Y,
                                                       test_size=0.2,
                                                       random_state=123)
 
-# %%
-
-
-
-
-
+################################
+# code beneath is not functional
 
 ###############################
 #           Training

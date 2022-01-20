@@ -36,7 +36,6 @@ def convolve_audio(user_audio, which_audio):
 
 # tu podajemy dane do wygenerowania (numeracja jest co dziesięć wiec podanie 10 wygeneruje zakres 10-19)
 chunks = [10]
-# brakuje 10-20
 
 
 start = time.time()
