@@ -34,8 +34,8 @@ def convolve_audio(user_audio, which_audio):
 
     return convolved_data
 
-
-chunks = [30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260]
+# tu podajemy dane do wygenerowania (numeracja jest co dziesięć wiec podanie 10 wygeneruje zakres 10-19)
+chunks = [10]
 # brakuje 10-20
 
 

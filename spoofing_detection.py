@@ -2,12 +2,13 @@ import numpy as np
 import pickle
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from keras.layers import Dense, Flatten, Dropout
+from keras.layers import Dense, Flatten, Dropout, Conv2D
 from keras.models import Sequential
 import matplotlib.pyplot as plt
 from scikeras.wrappers import KerasClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
+import itertools
 
 
 # %%
@@ -18,6 +19,8 @@ with open(f"data\\users512.p", "rb") as f:
     tmp_dict = pickle.load(f)
 
     real_data.update(tmp_dict)
+
+real_data = dict(itertools.islice(real_data.items(), 256))
 
 spoofing_data = {}
 # with open(f"data\\spoof512.p", "rb") as f:
@@ -73,6 +76,13 @@ X_train, X_valid, Y_train, Y_valid = train_test_split(X, encoded_Y,
                                                       test_size=0.2,
                                                       random_state=123)
 
+# %%
+
+
+
+
+
+
 ###############################
 #           Training
 #   k-fold cross validation
@@ -82,14 +92,16 @@ X_train, X_valid, Y_train, Y_valid = train_test_split(X, encoded_Y,
 
 # def create_model():
 model = Sequential()
-model.add(Dense(512, input_dim=7740, activation='relu'))
-model.add(Dense(128, activation="relu"))
-model.add(Dense(64, activation="relu"))
-model.add(Dense(1, activation='softmax'))
+# model.add(Flatten(input_dim=7740))
+model.add(Dense(256, activation='sigmoid'))
+model.add(Dense(128, activation='sigmoid'))
+model.add(Dense(64, activation='sigmoid'))
+model.add(Dense(1, activation='sigmoid'))
 
-model.compile(loss='binary_crossentropy', optimizer='SGD', metrics=['accuracy'])
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-history = model.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=80, batch_size=128)
+history = model.fit(X_train, Y_train,validation_data = (X_valid,Y_valid), epochs=30, batch_size=512)
+
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
 plt.title('model accuracy')
